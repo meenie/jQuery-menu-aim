@@ -90,6 +90,7 @@
                 rowSelector: "> li",
                 submenuSelector: "*",
                 submenuDirection: "right",
+                submenuActiveSelector: null,
                 tolerance: 75,  // bigger = more forgivey when entering submenu
                 enter: $.noop,
                 exit: $.noop,
@@ -154,6 +155,21 @@
                 activate(this);
             };
 
+        var isInSubmenu = function() {
+            var submenu = $(options.submenuSelector + options.submenuActiveSelector),
+                loc = mouseLocs[mouseLocs.length - 1];
+
+            if (options.submenuActiveSelector && submenu.length) {
+                if (!(loc.x < submenu[0].offsetLeft || loc.x > (submenu[0].offsetLeft + submenu[0].offsetWidth)
+                    || loc.y < submenu[0].offsetTop || loc.x > (submenu[0].offsetTop + submenu[0].offsetHeight))) {
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         /**
          * Activate a menu row.
          */
@@ -174,6 +190,10 @@
          * Possibly activate a menu row. If mouse movement indicates that we
          * shouldn't activate yet because user may be trying to enter
          * a submenu's content, then delay and check again later.
+         *
+         * If submenuSelector is passed as an option, check if mouse is inside
+         * submenu. This is useful if submenu is not a child element of the
+         * primary menu element.
          */
         var possiblyActivate = function(row) {
                 var delay = activationDelay();
@@ -182,7 +202,7 @@
                     timeoutId = setTimeout(function() {
                         possiblyActivate(row);
                     }, delay);
-                } else {
+                } else if (!(options.submenuSelector !== '*' && isInSubmenu())){
                     activate(row);
                 }
             };
@@ -294,7 +314,8 @@
                     prevIncreasingSlope = slope(prevLoc, increasingCorner);
 
                 if (decreasingSlope < prevDecreasingSlope &&
-                        increasingSlope > prevIncreasingSlope) {
+                        increasingSlope > prevIncreasingSlope ||
+                        isInSubmenu()) {
                     // Mouse is moving from previous location towards the
                     // currently activated submenu. Delay before activating a
                     // new menu row, because user may be moving into submenu.
