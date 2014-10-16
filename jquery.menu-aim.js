@@ -216,7 +216,8 @@
          * checking again to see if the row should be activated.
          */
         var activationDelay = function() {
-                if (!activeRow || !$(activeRow).is(options.submenuSelector)) {
+                if (!activeRow || !$(activeRow).is(options.submenuSelector) &&
+                    !(options.submenuActiveSelector && $(options.submenuSelector + options.submenuActiveSelector).length)) {
                     // If there is no other submenu row already active, then
                     // go ahead and activate immediately.
                     return 0;
@@ -224,19 +225,19 @@
 
                 var offset = $menu.offset(),
                     upperLeft = {
-                        x: offset.left,
+                        x: offset.left - options.tolerance,
                         y: offset.top - options.tolerance
                     },
                     upperRight = {
-                        x: offset.left + $menu.outerWidth(),
+                        x: offset.left + $menu.outerWidth() + options.tolerance,
                         y: upperLeft.y
                     },
                     lowerLeft = {
-                        x: offset.left,
+                        x: upperLeft.x,
                         y: offset.top + $menu.outerHeight() + options.tolerance
                     },
                     lowerRight = {
-                        x: offset.left + $menu.outerWidth(),
+                        x: upperRight.x,
                         y: lowerLeft.y
                     },
                     loc = mouseLocs[mouseLocs.length - 1],
